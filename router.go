@@ -27,8 +27,8 @@ type metricFile struct {
 	Metrics  []metric `json:"metrics"`
 }
 
-var textRegex = regexp.MustCompile(`^[\w\-]+$`)
-var valueRegex = regexp.MustCompile(`^\d+(.\d+)?$`)
+var textRegex = regexp.MustCompile(`^[\w\-/]+$`)
+var valueRegex = regexp.MustCompile(`^\d+(.\+)?$`)
 
 func (m *metric) String() string {
 	return fmt.Sprintf(
