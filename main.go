@@ -8,7 +8,7 @@ import (
 
 var (
 	metricRegex = regexp.MustCompile(`^/metric$`)
-	indexRegex  = regexp.MustCompile(`^/$`)
+	indexRegex  = regexp.MustCompile(`^/(metrics)?$`)
 )
 
 func main() {
