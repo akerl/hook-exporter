@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
+	"io"
 	"regexp"
 	"strings"
 
@@ -47,7 +49,7 @@ func (m *metric) TagString() string {
 	for k, v := range m.Tags {
 		tagStrings = append(tagStrings, fmt.Sprintf("%s=\"%s\"", k, v))
 	}
-	return fmt.Sprintf("{%s}", strings.Join(",", tagStrings))
+	return fmt.Sprintf("{%s}", strings.Join(tagStrings, ","))
 }
 
 func (m *metric) Validate() bool {
@@ -80,6 +82,9 @@ func (mf *metricFile) String() string {
 }
 
 func (mf *metricFile) Validate() bool {
+	if mf.FileName == "" {
+		return false
+	}
 	for _, x := range mf.Metrics {
 		if !x.Validate() {
 			return false
@@ -103,17 +108,51 @@ func metricAuth(req events.Request) (events.Response, error) {
 }
 
 func metricHandler(req events.Request) (events.Response, error) {
-}
+	body, err := req.DecodedBody()
+	if err != nil {
+		return events.Fail(fmt.Sprintf("failed to decode: %s", err))
+	}
 
-func indexHandler(req events.Request) (events.Response, error) {
+	var mf metricFile
+	err = json.Unmarshal([]byte(body), &mf)
+	if err != nil {
+		return events.Fail(fmt.Sprintf("failed to unmarshal: %s", err))
+	}
+
+	if !mf.Validate() {
+		return events.Fail("failed validation")
+	}
+
+	content, err := json.Marshal(mf)
+	if err != nil {
+		return events.Fail(fmt.Sprintf("failed to marshal: %s", err))
+	}
+
 	client, err := getClient()
 	if err != nil {
-		return events.Fail(err)
+		return events.Fail(fmt.Sprintf("failed to load client: %s", err))
+	}
+
+	_, err = client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: &c.MetricBucket,
+		Key:    &mf.FileName,
+		Body:   bytes.NewReader(content),
+	})
+	if err != nil {
+		return events.Fail(fmt.Sprintf("failed to write: %s", err))
+	}
+	return events.Succeed("")
+}
+
+func indexHandler(_ events.Request) (events.Response, error) {
+	client, err := getClient()
+	if err != nil {
+		return events.Fail(fmt.Sprintf("failed to load client: %s", err))
 	}
 
 	allMetrics, err := readMetrics(client)
 	if err != nil {
-		return events.Fail(err)
+		return events.Fail(fmt.Sprintf("failed to read metrics: %s", err))
 	}
 
 	return events.Succeed(allMetrics.String())
@@ -134,13 +173,13 @@ func readMetrics(client *s3.Client) (metricFile, error) {
 		return metricFile{}, err
 	}
 
-	allMetrics := metricFile{}
+	allMetrics := metricFile{FileName: "__all__"}
 	for _, f := range files {
 		mf, err := readMetricFile(client, f)
 		if err != nil {
 			return metricFile{}, err
 		}
-		allMetrics.Metrics = append(allMetrics.Metrics, mf.Metrics)
+		allMetrics.Metrics = append(allMetrics.Metrics, mf.Metrics...)
 	}
 	return allMetrics, nil
 }
@@ -156,8 +195,13 @@ func readMetricFile(client *s3.Client, f string) (metricFile, error) {
 		return metricFile{}, err
 	}
 
+	body, err := io.ReadAll(result.Body)
+	if err != nil {
+		return metricFile{}, err
+	}
+
 	var mf metricFile
-	err = json.Unmarshal(request.Body, &mf)
+	err = json.Unmarshal(body, &mf)
 	if err != nil {
 		return metricFile{}, err
 	}
