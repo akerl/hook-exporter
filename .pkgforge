@@ -8,8 +8,8 @@ source(
 
 build do
   run 'make local'
-  run 'cp ./bin/hook-exporter_linux_amd64 ./main'
-  run 'zip payload.zip ./main'
+  run 'cp ./bin/hook-exporter_linux_arm64 ./bootstrap'
+  run 'zip payload.zip ./bootstrap'
   cp 'payload.zip'
 end
 
