@@ -28,7 +28,7 @@ type metricFile struct {
 }
 
 var textRegex = regexp.MustCompile(`^[\w\-/]+$`)
-var valueRegex = regexp.MustCompile(`^\d+(.\+)?$`)
+var valueRegex = regexp.MustCompile(`^\d+(.\d+)?$`)
 
 func (m *metric) String() string {
 	return fmt.Sprintf(
