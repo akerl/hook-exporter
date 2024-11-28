@@ -155,7 +155,11 @@ func indexHandler(_ events.Request) (events.Response, error) {
 		return events.Fail(fmt.Sprintf("failed to read metrics: %s", err))
 	}
 
-	return events.Succeed(allMetrics.String())
+	return events.Response{
+		StatusCode: 200,
+		Body:       allMetrics.String(),
+		Headers:    map[string]string{"Content-Type": "text/plain"},
+	}, nil
 }
 
 func getClient() (*s3.Client, error) {
