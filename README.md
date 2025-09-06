@@ -1,11 +1,11 @@
-watchdog-lambda
+hook-exporter
 =========
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/akerl/watchdog-lambda/build.yml?branch=main)](https://github.com/akerl/watchdog-lambda/actions)
-[![GitHub release](https://img.shields.io/github/release/akerl/watchdog-lambda.svg)](https://github.com/akerl/watchdog-lambda/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/akerl/hook-exporter/build.yml?branch=main)](https://github.com/akerl/hook-exporter/actions)
+[![GitHub release](https://img.shields.io/github/release/akerl/hook-exporter.svg)](https://github.com/akerl/hook-exporter/releases)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-green.svg)](https://tldrlegal.com/license/mit-license)
 
-Lambda for alerting if actions don't occur in a timely manner
+Prometheus-format monitor for webhook status
 
 ## Usage
 
@@ -13,4 +13,4 @@ Lambda for alerting if actions don't occur in a timely manner
 
 ## License
 
-watchdog-lambda is released under the MIT License. See the bundled LICENSE file for details.
+hook-exporter is released under the MIT License. See the bundled LICENSE file for details.
