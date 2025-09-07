@@ -16,28 +16,8 @@ import (
 )
 
 type metricFile struct {
-	FileName string           `json:"name"`
-	Metrics  []metrics.Metric `json:"metrics"`
-}
-
-func (mf *metricFile) String() string {
-	var sb strings.Builder
-	for _, x := range mf.Metrics {
-		sb.WriteString(x.String())
-	}
-	return sb.String()
-}
-
-func (mf *metricFile) Validate() bool {
-	if mf.FileName == "" {
-		return false
-	}
-	for _, x := range mf.Metrics {
-		if !x.Validate() {
-			return false
-		}
-	}
-	return true
+	FileName string            `json:"name"`
+	Metrics  metrics.MetricSet `json:"metrics"`
 }
 
 func metricAuth(req events.Request) (events.Response, error) {
@@ -66,7 +46,7 @@ func metricHandler(req events.Request) (events.Response, error) {
 		return events.Fail(fmt.Sprintf("failed to unmarshal: %s", err))
 	}
 
-	if !mf.Validate() {
+	if !mf.Metrics.Validate() {
 		return events.Fail("failed validation")
 	}
 
@@ -118,21 +98,22 @@ func getClient() (*s3.Client, error) {
 	return s3.NewFromConfig(cfg), nil
 }
 
-func readMetrics(client *s3.Client) (metricFile, error) {
+func readMetrics(client *s3.Client) (metrics.MetricSet, error) {
+	all := metrics.MetricSet{}
+
 	files, err := listMetricFiles(client)
 	if err != nil {
-		return metricFile{}, err
+		return all, err
 	}
 
-	allMetrics := metricFile{FileName: "__all__"}
 	for _, f := range files {
 		mf, err := readMetricFile(client, f)
 		if err != nil {
-			return metricFile{}, err
+			return metrics.MetricSet{}, err
 		}
-		allMetrics.Metrics = append(allMetrics.Metrics, mf.Metrics...)
+		all = append(all, mf.Metrics...)
 	}
-	return allMetrics, nil
+	return all, nil
 }
 
 func readMetricFile(client *s3.Client, f string) (metricFile, error) {
@@ -157,7 +138,7 @@ func readMetricFile(client *s3.Client, f string) (metricFile, error) {
 		return metricFile{}, err
 	}
 
-	if !mf.Validate() {
+	if !mf.Metrics.Validate() {
 		return metricFile{}, fmt.Errorf("failed validation for %s", f)
 	}
 	return mf, nil

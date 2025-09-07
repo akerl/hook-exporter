@@ -1,7 +1,7 @@
 github.com/akerl/go-lambda v0.7.0 h1:0QVkk0Oc2HhqseRVSg0iE/1tC/ygv5o1Pd05wEcdXjo=
 github.com/akerl/go-lambda v0.7.0/go.mod h1:tNOGTmC3cJPj6sIoVh47eTX6ca6RXZpUPFzJKtDbBrA=
-github.com/akerl/metrics v0.0.1 h1:McMLPpdOJ9ccYxncnRWMRKS48lnt6ug5TUwEl2Mp7uw=
-github.com/akerl/metrics v0.0.1/go.mod h1:9At5yZEcc8Dvd7S/14xcW8NWwawW/jVCY+tPH7ZV4+I=
+github.com/akerl/metrics v0.0.3 h1:cUUhmDjtxAmjrsKxBfAdOyYexsxAmAbtVPibda3xz4Q=
+github.com/akerl/metrics v0.0.3/go.mod h1:9At5yZEcc8Dvd7S/14xcW8NWwawW/jVCY+tPH7ZV4+I=
 github.com/akerl/timber/v2 v2.0.1 h1:hY4VCOJns7KsxwxP/ifSt3Rz9GZCfKewapaimObnA2E=
 github.com/akerl/timber/v2 v2.0.1/go.mod h1:jBjRGI2CWuvbZlrZkp1JO/X51pMlbg72NFy+Vnd59oI=
 github.com/aws/aws-lambda-go v1.41.0 h1:l/5fyVb6Ud9uYd411xdHZzSf2n86TakxzpvIoz7l+3Y=
