@@ -7,70 +7,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 
 	"github.com/akerl/go-lambda/apigw/events"
+	"github.com/akerl/metrics/metrics"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-type metric struct {
-	Name  string            `json:"name"`
-	Type  string            `json:"type"`
-	Tags  map[string]string `json:"tags"`
-	Value string            `json:"value"`
-}
-
 type metricFile struct {
-	FileName string   `json:"name"`
-	Metrics  []metric `json:"metrics"`
-}
-
-var textRegex = regexp.MustCompile(`^[\w\-/]+$`)
-var valueRegex = regexp.MustCompile(`^\d+(.\d+)?$`)
-
-func (m *metric) String() string {
-	return fmt.Sprintf(
-		"# TYPE %s %s\n%s%s %s\n\n",
-		m.Name,
-		m.Type,
-		m.Name,
-		m.TagString(),
-		m.Value,
-	)
-}
-
-func (m *metric) TagString() string {
-	if len(m.Tags) == 0 {
-		return ""
-	}
-	tagStrings := []string{}
-	for k, v := range m.Tags {
-		tagStrings = append(tagStrings, fmt.Sprintf("%s=\"%s\"", k, v))
-	}
-	return fmt.Sprintf("{%s}", strings.Join(tagStrings, ","))
-}
-
-func (m *metric) Validate() bool {
-	if !textRegex.MatchString(m.Name) {
-		return false
-	}
-	if !textRegex.MatchString(m.Type) {
-		return false
-	}
-	if !valueRegex.MatchString(m.Value) {
-		return false
-	}
-	for k, v := range m.Tags {
-		if !textRegex.MatchString(k) {
-			return false
-		}
-		if !textRegex.MatchString(v) {
-			return false
-		}
-	}
-	return true
+	FileName string           `json:"name"`
+	Metrics  []metrics.Metric `json:"metrics"`
 }
 
 func (mf *metricFile) String() string {
